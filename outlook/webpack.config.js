@@ -5,7 +5,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require('webpack');
 
-module.exports = async (env, options)  => {
+module.exports = async (env, options) => {
   const dev = options.mode === "development";
   let domain = "localhost:3000";
   if (env && env.DOMAIN) {
@@ -19,11 +19,11 @@ module.exports = async (env, options)  => {
         'react-dom',
         'core-js',
         'office-ui-fabric-react'
-    ],
-    taskpane: [
+      ],
+      taskpane: [
         'react-hot-loader/patch',
         './src/taskpane/index.tsx',
-    ],
+      ],
     },
     resolve: {
       extensions: [".ts", ".tsx", ".html", ".js"]
@@ -33,8 +33,8 @@ module.exports = async (env, options)  => {
         {
           test: /\.tsx?$/,
           use: [
-              'react-hot-loader/webpack',
-              'ts-loader'
+            'react-hot-loader/webpack',
+            'ts-loader'
           ],
           exclude: /node_modules/
         },
@@ -45,14 +45,14 @@ module.exports = async (env, options)  => {
         {
           test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
           use: {
-              loader: 'file-loader',
-              query: {
-                  name: 'assets/[name].[ext]'
-                }
-              }  
-            }   
-          ]
-    },    
+            loader: 'file-loader',
+            query: {
+              name: 'assets/[name].[ext]'
+            }
+          }
+        }
+      ]
+    },
     plugins: [
       new CleanWebpackPlugin(),
       new CopyWebpackPlugin(
@@ -87,8 +87,8 @@ module.exports = async (env, options)  => {
       new ExtractTextPlugin('[name].[hash].css'),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
-          template: './src/taskpane/taskpane.html',
-          chunks: ['taskpane', 'vendor', 'polyfills']
+        template: './src/taskpane/taskpane.html',
+        chunks: ['taskpane', 'vendor', 'polyfills']
       }),
       new HtmlWebpackPlugin({
         filename: "dialog.html",
@@ -101,8 +101,25 @@ module.exports = async (env, options)  => {
     devServer: {
       headers: {
         "Access-Control-Allow-Origin": "*"
-      },      
-      https: (options.https !== undefined) ? options.https : await devCerts.getHttpsServerOptions(),
+      },
+      https: await (async () => {
+        if (options.https !== undefined) {
+          return options.https;
+        }
+        try {
+          return await devCerts.getHttpsServerOptions();
+        } catch (e) {
+          console.log('Using manual certificate paths for Linux');
+          const fs = require('fs');
+          const path = require('path');
+          const homedir = require('os').homedir();
+          return {
+            key: fs.readFileSync(path.join(homedir, '.office-addin-dev-certs/localhost.key')),
+            cert: fs.readFileSync(path.join(homedir, '.office-addin-dev-certs/localhost.crt')),
+            ca: fs.readFileSync(path.join(homedir, '.office-addin-dev-certs/ca.crt')),
+          };
+        }
+      })(),
       port: process.env.npm_package_config_dev_server_port || 3000
     }
   };
