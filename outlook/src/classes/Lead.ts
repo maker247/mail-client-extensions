@@ -12,6 +12,8 @@ class Lead {
         lead.name = o['name'];
         lead.probability = o['probability'];
 
+        console.log(o, 'lead info')
+
         lead.expectedRevenue = this.removeDecimals(o['expected_revenue']);
 
         if (o['recurring_revenue']) {

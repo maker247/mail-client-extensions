@@ -15,11 +15,14 @@ import Lead from '../../../../classes/Lead';
 import HelpdeskTicket from '../../../../classes/HelpdeskTicket';
 import SectionTasks from '../../SectionTasks/SectionTasks';
 import Task from '../../../../classes/Task';
+import SectionSaleOrders from '../../SectionSaleOrders/SectionSaleOrders';
+import SaleOrder from '../../../../classes/SaleOrder';
 
 type ContactPageProps = {
     partner: Partner;
     onPartnerChanged?: (Partner) => void;
     loadPartner: boolean;
+    onSeeAllSaleOrders: () => void;
 };
 
 type ContactPageState = {
@@ -76,6 +79,11 @@ class ContactPage extends React.Component<ContactPageProps, ContactPageState> {
                         HelpdeskTicket.fromJSON(ticket_json),
                     );
                 }
+                if (parsed.result.sale_orders) {
+                    newPartner.saleOrders = parsed.result.sale_orders
+                        .filter((so) => so['state'] === 'draft')
+                        .map((so_json) => SaleOrder.fromJSON(so_json));
+                }
                 if (parsed.result.user_companies) {
                     this.context.setUserCompanies(parsed.result.user_companies);
                 }
@@ -118,6 +126,10 @@ class ContactPage extends React.Component<ContactPageProps, ContactPageState> {
         return this.props.partner.tickets !== undefined;
     };
 
+    private isSaleInstalled = (): boolean => {
+        return this.state.partner.saleOrders !== undefined;
+    };
+
     private propagatePartnerInfoChange = (partner: Partner) => {
         this.setState({ partner: partner });
         this.props.onPartnerChanged(partner);
@@ -155,6 +167,14 @@ class ContactPage extends React.Component<ContactPageProps, ContactPageState> {
             <SectionTickets partner={this.state.partner} canCreatePartner={this.state.canCreatePartner} />
         );
 
+        const saleOrdersList = this.isSaleInstalled() && (
+            <SectionSaleOrders
+                partner={this.state.partner}
+                canCreatePartner={this.state.canCreatePartner}
+                onSeeAll={this.props.onSeeAllSaleOrders}
+            />
+        );
+
         const onItemClick = this.props.partner.isAddedToDatabase() ? this.viewContact : null;
 
         return (
@@ -167,13 +187,14 @@ class ContactPage extends React.Component<ContactPageProps, ContactPageState> {
                     />
                 </div>
                 {leadsList}
+                {saleOrdersList}
                 {tasksList}
                 {ticketsList}
                 <CompanySection
                     partner={this.state.partner}
                     canCreatePartner={this.state.canCreatePartner}
                     onPartnerInfoChanged={this.propagatePartnerInfoChange}
-                    hideCollapseButton={!leadsList && !tasksList && !ticketsList}
+                    hideCollapseButton={!leadsList && !tasksList && !ticketsList && !saleOrdersList}
                 />
             </div>
         );

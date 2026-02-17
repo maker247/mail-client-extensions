@@ -13,9 +13,32 @@
     width: 20px;
 }
 
+.custom-log-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    color: #a2478a;
+    transform: translateY(-2px);
+}
+
+.log-button:hover .custom-log-icon {
+    color: white !important;
+}
+
 .logged-text {
     height: fit-content;
     padding: 4px;
     color: #777;
     font-size: smaller;
+}
+
+.log-button.has-value {
+    color: #015a5f !important;
+    border-color: #015a5f !important;
+}
+
+.log-button.has-value:hover {
+    color: white !important;
+    background-color: #03838a !important;
+    border-color: #03838a !important;
 }

@@ -42,6 +42,7 @@ export interface AppState {
     setUserCompanies: (userCompanies: number[]) => void;
     showTopBarMessage: (enrichmentInfo?: EnrichmentInfo) => void;
     showHttpErrorMessage: (error) => void;
+    showValidationErrorMessage: (message: string) => void;
 }
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -130,6 +131,12 @@ export default class App extends React.Component<AppProps, AppState> {
                         showEnrichmentInfoMessage: true,
                     });
                 }
+            },
+            showValidationErrorMessage: (message: string) => {
+                this.setState({
+                    EnrichmentInfo: new EnrichmentInfo(EnrichmentInfoType.OdooCustomError, message),
+                    showEnrichmentInfoMessage: true,
+                });
             },
         };
     }

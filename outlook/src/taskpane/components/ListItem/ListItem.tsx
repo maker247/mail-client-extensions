@@ -12,6 +12,8 @@ type ListItemProps = {
     model: string;
     res_id: number;
     logTitle: string;
+    partnerId?: number;
+    hasValue?: boolean;
 };
 
 class ListItem extends React.Component<ListItemProps, {}> {
@@ -28,10 +30,18 @@ class ListItem extends React.Component<ListItemProps, {}> {
                     <div className="list-item-info-container">
                         <div className="list-item-title-text">{this.props.title}</div>
                         {this.props.description && (
-                            <div className="list-item-description">{this.props.description}</div>
+                            <div className="list-item-description">
+                                <small>{this.props.description}</small>
+                            </div>
                         )}
                     </div>
-                    <Logger resId={this.props.res_id} model={this.props.model} tooltipContent={this.props.logTitle} />
+                    <Logger
+                        resId={this.props.res_id}
+                        model={this.props.model}
+                        tooltipContent={this.props.logTitle}
+                        partnerId={this.props.partnerId}
+                        hasValue={this.props.hasValue}
+                    />
                 </div>
             </div>
         );

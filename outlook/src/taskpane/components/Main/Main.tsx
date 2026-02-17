@@ -19,6 +19,7 @@ import EnrichmentInfo, { EnrichmentInfoType } from '../../../classes/EnrichmentI
 import Progress from '../GrayOverlay';
 import { TooltipHost } from 'office-ui-fabric-react';
 import { _t, saveTranslations, translationsExpired } from '../../../utils/Translator';
+import SaleOrdersPage from '../SaleOrdersPage/SaleOrdersPage';
 
 type MainProps = {
     canCreatePartner: boolean;
@@ -35,11 +36,13 @@ type MainState = {
     poppedElement: BackStackItem;
     contactKey: number; //used for contact refresh
     loadPartner: boolean;
+    isShowingSaleOrders: boolean;
 };
 
 enum BackStackItemType {
     partner,
     query,
+    saleOrders,
 }
 
 type BackStackItem = {
@@ -64,6 +67,7 @@ class Main extends React.Component<MainProps, MainState> {
             poppedElement: undefined,
             contactKey: Math.random(),
             loadPartner: true,
+            isShowingSaleOrders: false,
         };
 
         this.companyCache = new CompanyCache(2, 200, 0.25);
@@ -316,6 +320,15 @@ class Main extends React.Component<MainProps, MainState> {
         this.setState({ contactKey: Math.random(), loadPartner: true });
     };
 
+    private onSeeAllSaleOrders = () => {
+        const backStackItem = {
+            type: BackStackItemType.partner,
+            element: this.state.selectedPartner,
+        } as BackStackItem;
+        this.pushItemBackStack(backStackItem);
+        this.setState({ isShowingSaleOrders: true });
+    };
+
     private onBackClicked = () => {
         let backStack = [...this.state.backStack];
         const backStackItem = backStack.pop();
@@ -323,6 +336,7 @@ class Main extends React.Component<MainProps, MainState> {
             const partner = backStackItem.element as Partner;
             this.setState({
                 isSearching: false,
+                isShowingSaleOrders: false,
                 selectedPartner: partner,
                 poppedElement: backStackItem,
                 backStack: backStack,
@@ -478,11 +492,24 @@ class Main extends React.Component<MainProps, MainState> {
                             partner={this.state.selectedPartner}
                             onPartnerChanged={this.updatePartner}
                             loadPartner={this.state.loadPartner}
+                            onSeeAllSaleOrders={this.onSeeAllSaleOrders}
                             key={this.state.contactKey}
                         />
                     </>
                 );
             }
+        }
+
+        if (this.state.isShowingSaleOrders) {
+            mainContent = (
+                <SaleOrdersPage
+                    partner={this.state.selectedPartner}
+                    onBack={this.onBackClicked}
+                    loadPartner={this.state.loadPartner}
+                    onPartnerChanged={this.updatePartner}
+                    key={this.state.contactKey}
+                />
+            );
         }
         return (
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

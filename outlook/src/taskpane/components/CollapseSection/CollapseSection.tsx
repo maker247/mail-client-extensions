@@ -2,7 +2,6 @@ import * as React from 'react';
 import { faChevronDown, faChevronRight, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './CollapseSection.css';
-import { ReactElement } from 'react';
 
 type CollapseSectionProps = {
     title: string;
@@ -10,7 +9,7 @@ type CollapseSectionProps = {
     hasAddButton?: boolean;
     onAddButtonClick?: () => void;
     hideCollapseButton?: boolean;
-    children: ReactElement;
+    children: React.ReactNode;
     className?: string;
 };
 

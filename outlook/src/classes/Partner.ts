@@ -3,6 +3,7 @@ import EnrichmentInfo from './EnrichmentInfo';
 import Lead from './Lead';
 import HelpdeskTicket from './HelpdeskTicket';
 import Task from './Task';
+import SaleOrder from './SaleOrder';
 
 /***
  * id value for partners which have not been yet added to a Odoo database
@@ -23,6 +24,8 @@ class Partner {
     leads?: Lead[];
     tasks?: Task[];
     tickets?: HelpdeskTicket[];
+    saleOrders?: SaleOrder[];
+    currentSaleOrderId?: number;
     isCompany: boolean;
     canWriteOnPartner: boolean;
 
@@ -62,6 +65,14 @@ class Partner {
         partner.isCompany = o['is_company'];
         // Undefined is considered as True for retro-compatibility
         partner.canWriteOnPartner = o['can_write_on_partner'] !== false;
+        partner.currentSaleOrderId = o['current_sale_order_id'];
+
+        if (o['sale_orders']) {
+            partner.saleOrders = o['sale_orders']
+                .filter((so) => so['state'] === 'draft')
+                .map((so) => SaleOrder.fromJSON(so));
+        }
+
         return partner;
     }
 

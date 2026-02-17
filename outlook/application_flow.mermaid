@@ -1,0 +1,30 @@
+
+sequenceDiagram
+    participant User
+    participant Outlook as Outlook Client
+    participant Taskpane as Add-in (Taskpane)
+    participant Odoo as Odoo Server (Backend)
+
+    User->>Outlook: Opens Email
+    Outlook->>Taskpane: Activates Add-in (ItemChanged Event)
+    Taskpane->>Taskpane: loadEmailContacts()
+    Taskpane->>Outlook: Get Sender & Recipients
+    Taskpane->>Odoo: POST /mail_plugin/partner/search (emails)
+    Odoo-->>Taskpane: Returns Partner Data (Leads, Tickets, Companies)
+    
+    alt Partner Found
+        Taskpane->>User: Displays Contact Info (PartnerView)
+    else Partner Not Found
+        Taskpane->>User: Displays "No Contact Found" (SearchRecords)
+        User->>Taskpane: Clicks "Create Contact"
+        Taskpane->>Odoo: POST /mail_plugin/partner/create
+    end
+
+    User->>Taskpane: Clicks "Log Email"
+    Taskpane->>Odoo: POST /mail_plugin/log_email (message_id, body)
+    Odoo-->>Taskpane: Success (Email Logged on Partner/Lead)
+
+    Note over Odoo, Taskpane: To implement "First Quotation Sent"
+    Note over Odoo: 1. Add 'first_quotation_sent_at' field to Sale Order
+    Note over Odoo: 2. Override 'action_quotation_send' to set timestamp
+    Note over Taskpane: 3. Update Partner.ts to fetch this field from API

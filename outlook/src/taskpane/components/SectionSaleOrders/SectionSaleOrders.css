@@ -1,0 +1,13 @@
+.see-all-sale-orders {
+    padding: 10px;
+    color: #017e84;
+    text-align: right;
+    font-size: small;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.see-all-sale-orders:hover {
+    color: #015a5f;
+}

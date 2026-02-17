@@ -34,6 +34,8 @@ type SectionAbstractProps = {
     msgNoRecord: string;
     msgLogEmail: string;
     getRecordDescription: (any) => string;
+    getRecordHasValue?: (any) => boolean;
+    recordCount?: number;
 };
 
 type SectionAbstractState = {
@@ -91,8 +93,13 @@ class Section extends React.Component<SectionAbstractProps, SectionAbstractState
             }
 
             const parsed = JSON.parse(response);
-            if (parsed['error']) {
-                this.context.showTopBarMessage();
+            if (parsed['error'] || (parsed['result'] && parsed['result']['error'])) {
+                const errorMessage = parsed['error']?.message || parsed['result']?.error;
+                if (errorMessage) {
+                    this.context.showValidationErrorMessage(errorMessage);
+                } else {
+                    this.context.showTopBarMessage();
+                }
                 return;
             }
             const cids = this.context.getUserCompaniesString();
@@ -120,6 +127,8 @@ class Section extends React.Component<SectionAbstractProps, SectionAbstractState
                             title={record.name}
                             description={this.props.getRecordDescription(record)}
                             logTitle={_t(this.props.msgLogEmail)}
+                            partnerId={this.props.partner.id}
+                            hasValue={this.props.getRecordHasValue?.(record)}
                         />
                     ))}
                 </div>
@@ -129,8 +138,8 @@ class Section extends React.Component<SectionAbstractProps, SectionAbstractState
     };
 
     render() {
-        const recordCount = this.state.records && this.state.records.length;
-        const title = this.state.records
+        const recordCount = this.props.recordCount !== undefined ? this.props.recordCount : (this.state.records && this.state.records.length);
+        const title = this.state.records || this.props.recordCount !== undefined
             ? _t(this.props.titleCount, { count: recordCount.toString() })
             : _t(this.props.title);
 
@@ -139,9 +148,10 @@ class Section extends React.Component<SectionAbstractProps, SectionAbstractState
                 className={this.props.className}
                 isCollapsed={this.state.isCollapsed}
                 title={title}
-                hasAddButton={this.props.partner.isAddedToDatabase()}
+                hasAddButton={this.props.partner.isAddedToDatabase() && !!this.props.odooEndpointCreateRecord}
                 onAddButtonClick={this.onClickCreate}>
                 {this.getSection()}
+                {this.props.children}
             </CollapseSection>
         );
     }
