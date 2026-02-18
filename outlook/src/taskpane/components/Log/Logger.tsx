@@ -156,7 +156,7 @@ class Logger extends React.Component<LoggerProps, LoggerState> {
                 ...(this.props.model === 'sale.order' ? {
                     partner_id: this.props.partnerId,
                     requested_mail_id: mailId,
-                    requested_at: ((): string => {
+                    requested_date: ((): string => {
                         const d = Office.context.mailbox.item.dateTimeCreated;
                         const year = d.getUTCFullYear();
                         const month = ('0' + (d.getUTCMonth() + 1)).slice(-2);

@@ -25,13 +25,9 @@ class SectionSaleOrders extends React.Component<SaleOrderSectionProps> {
         const allSaleOrders = this.props.partner.saleOrders || [];
         const totalCount = allSaleOrders.length;
 
-        let displayedOrders = [];
-        if (totalCount > 0) {
-            const current = allSaleOrders.find(o => o.id === this.props.partner.currentSaleOrderId);
-            displayedOrders = [current || allSaleOrders[0]];
-        }
+        console.log(allSaleOrders, 'allSaleOrders')
 
-        displayedOrders = displayedOrders.map((order) => {
+        const displayedOrders = allSaleOrders.map((order) => {
             return {
                 ...order,
                 name: this.getTitle(order),
@@ -55,7 +51,7 @@ class SectionSaleOrders extends React.Component<SaleOrderSectionProps> {
                 msgNoRecord="No quotations found for this contact."
                 msgLogEmail="Link to Odoo"
                 getRecordDescription={this.getOrderDescription}
-                getRecordHasValue={(order) => !!order.requested_at}>
+                getRecordHasValue={(order) => !!order.requested_date}>
                 {allSaleOrders.length > 0 && (
                     <div className="see-all-sale-orders" onClick={this.props.onSeeAll}>
                         {_t('See All')}

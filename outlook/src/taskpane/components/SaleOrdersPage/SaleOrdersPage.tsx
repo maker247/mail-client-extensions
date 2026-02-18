@@ -76,7 +76,6 @@ class SaleOrdersPage extends React.Component<SaleOrdersPageProps, SaleOrdersPage
                 }
                 if (parsed.result.sale_orders) {
                     newPartner.saleOrders = parsed.result.sale_orders
-                        .filter((so) => so['state'] === 'draft')
                         .map((so_json) => SaleOrder.fromJSON(so_json));
                 }
                 if (parsed.result.user_companies) {
@@ -142,7 +141,7 @@ class SaleOrdersPage extends React.Component<SaleOrdersPageProps, SaleOrdersPage
                                         description={this.getOrderDescription(order)}
                                         logTitle={_t('Link to Odoo')}
                                         partnerId={partner.id}
-                                        hasValue={!!order.requested_at}
+                                        hasValue={!!order.requested_date}
                                     />
                                 </div>
                             ))}
@@ -160,7 +159,7 @@ class SaleOrdersPage extends React.Component<SaleOrdersPageProps, SaleOrdersPage
                                     description={this.getOrderDescription(order)}
                                     logTitle={_t('Link to Odoo')}
                                     partnerId={partner.id}
-                                    hasValue={!!order.requested_at}
+                                    hasValue={!!order.requested_date}
                                 />
                             ))}
                         </>

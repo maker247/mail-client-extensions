@@ -4,7 +4,7 @@ class SaleOrder {
     amountTotal: string;
     state: string;
     dateOrder: string;
-    requested_at?: string;
+    requested_date?: string;
     quotation_name?: string;
 
     static fromJSON(o: Object): SaleOrder {
@@ -15,7 +15,7 @@ class SaleOrder {
         order.amountTotal = o['amount_total'];
         order.state = o['state'];
         order.dateOrder = o['date_order'];
-        order.requested_at = o['requested_at'];
+        order.requested_date = o['requested_date'];
         order.quotation_name = o['quotation_name'];
         return order;
     }

@@ -81,7 +81,6 @@ class ContactPage extends React.Component<ContactPageProps, ContactPageState> {
                 }
                 if (parsed.result.sale_orders) {
                     newPartner.saleOrders = parsed.result.sale_orders
-                        .filter((so) => so['state'] === 'draft')
                         .map((so_json) => SaleOrder.fromJSON(so_json));
                 }
                 if (parsed.result.user_companies) {
