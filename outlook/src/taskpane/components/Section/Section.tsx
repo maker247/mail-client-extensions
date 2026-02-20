@@ -2,6 +2,7 @@ import * as React from 'react';
 import Partner from '../../../classes/Partner';
 import { ContentType, HttpVerb, sendHttpRequest } from '../../../utils/httpRequest';
 import { _t } from '../../../utils/Translator';
+import './Section.css';
 import CollapseSection from '../CollapseSection/CollapseSection';
 import ListItem from '../ListItem/ListItem';
 import api from '../../api';
@@ -36,6 +37,7 @@ type SectionAbstractProps = {
     getRecordDescription: (any) => string;
     getRecordHasValue?: (any) => boolean;
     recordCount?: number;
+    recentSaleOrderId?: number;
 };
 
 type SectionAbstractState = {
@@ -50,6 +52,7 @@ type SectionAbstractState = {
 class Section extends React.Component<SectionAbstractProps, SectionAbstractState> {
     constructor(props, context) {
         super(props, context);
+        console.log(props, 'Section');
         const isCollapsed = !props.records || !props.records.length;
         this.state = { records: this.props.records, isCollapsed: isCollapsed };
     }
@@ -119,6 +122,7 @@ class Section extends React.Component<SectionAbstractProps, SectionAbstractState
         } else if (this.state.records.length > 0) {
             return (
                 <div className="section-content">
+                    {this.props.recentSaleOrderId && <div className="recent">Recent</div>}
                     {this.state.records.map((record) => (
                         <ListItem
                             model={this.props.model}

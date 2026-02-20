@@ -10,6 +10,8 @@ type SaleOrderSectionProps = {
     partner: Partner;
     canCreatePartner: boolean;
     onSeeAll: () => void;
+    isUserPage?: boolean;
+    recentSaleOrderId?: number;
 };
 
 class SectionSaleOrders extends React.Component<SaleOrderSectionProps> {
@@ -25,9 +27,17 @@ class SectionSaleOrders extends React.Component<SaleOrderSectionProps> {
         const allSaleOrders = this.props.partner.saleOrders || [];
         const totalCount = allSaleOrders.length;
 
-        console.log(allSaleOrders, 'allSaleOrders')
+        let ordersToDisplay = allSaleOrders;
+        if (this.props.isUserPage && allSaleOrders.length > 0) {
+            if (this.props.recentSaleOrderId) {
+                const recent = allSaleOrders.find(o => o.id === this.props.recentSaleOrderId);
+                ordersToDisplay = recent ? [recent] : [allSaleOrders[0]];
+            } else {
+                ordersToDisplay = [allSaleOrders[0]];
+            }
+        }
 
-        const displayedOrders = allSaleOrders.map((order) => {
+        const displayedOrders = ordersToDisplay.map((order) => {
             return {
                 ...order,
                 name: this.getTitle(order),
@@ -50,9 +60,10 @@ class SectionSaleOrders extends React.Component<SaleOrderSectionProps> {
                 msgNoPartnerNoAccess="Access denied to quotations."
                 msgNoRecord="No quotations found for this contact."
                 msgLogEmail="Link to Odoo"
+                recentSaleOrderId={this.props.recentSaleOrderId}
                 getRecordDescription={this.getOrderDescription}
                 getRecordHasValue={(order) => !!order.requested_date}>
-                {allSaleOrders.length > 0 && (
+                {this.props.isUserPage && allSaleOrders.length > 0 && (
                     <div className="see-all-sale-orders" onClick={this.props.onSeeAll}>
                         {_t('See All')}
                     </div>

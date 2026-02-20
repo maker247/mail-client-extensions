@@ -9,6 +9,10 @@ import PartnerData from '../../../classes/Partner';
 import Partner from '../../../classes/Partner';
 import CompanyCache from '../../../classes/CompanyCache';
 import CompanyData, { EnrichmentStatus } from '../../../classes/Company';
+import Lead from '../../../classes/Lead';
+import Task from '../../../classes/Task';
+import HelpdeskTicket from '../../../classes/HelpdeskTicket';
+import SaleOrder from '../../../classes/SaleOrder';
 
 import AppContext from '../AppContext';
 import ContactPage from '../Contact/ContactPage/ContactPage';
@@ -17,9 +21,11 @@ import Search, { SearchState } from '../Search/Search';
 import { faArrowLeft, faPlusCircle, faRedoAlt, faSearch } from '@fortawesome/free-solid-svg-icons';
 import EnrichmentInfo, { EnrichmentInfoType } from '../../../classes/EnrichmentInfo';
 import Progress from '../GrayOverlay';
-import { TooltipHost } from 'office-ui-fabric-react';
+import { TooltipHost, Pivot, PivotItem } from 'office-ui-fabric-react';
 import { _t, saveTranslations, translationsExpired } from '../../../utils/Translator';
 import SaleOrdersPage from '../SaleOrdersPage/SaleOrdersPage';
+import UserPage from '../User/UserPage/UserPage';
+import User from '../../../classes/User';
 
 type MainProps = {
     canCreatePartner: boolean;
@@ -37,6 +43,10 @@ type MainState = {
     contactKey: number; //used for contact refresh
     loadPartner: boolean;
     isShowingSaleOrders: boolean;
+    loggedInUser: User;
+    userLoading: boolean;
+    activeTab: string;
+    saleOrdersPartnerOverride?: Partner;
 };
 
 enum BackStackItemType {
@@ -68,6 +78,9 @@ class Main extends React.Component<MainProps, MainState> {
             contactKey: Math.random(),
             loadPartner: true,
             isShowingSaleOrders: false,
+            loggedInUser: User.getEmptyUser(),
+            userLoading: true,
+            activeTab: 'contact',
         };
 
         this.companyCache = new CompanyCache(2, 200, 0.25);
@@ -76,6 +89,7 @@ class Main extends React.Component<MainProps, MainState> {
     componentDidMount() {
         if (this.context.isConnected()) {
             this.getAllMatchedPartnersRequest();
+            this.getLoggedInUserRequest();
             if (translationsExpired()) {
                 this.getTranslations();
             } else {
@@ -207,6 +221,57 @@ class Main extends React.Component<MainProps, MainState> {
             });
     };
 
+    private getLoggedInUserRequest = () => {
+        const requestPromise = sendHttpRequest(
+            HttpVerb.POST,
+            api.baseURL + api.getUser,
+            ContentType.Json,
+            this.context.getConnectionToken(),
+            {},
+            true,
+        ).promise;
+        requestPromise
+            .then((response) => {
+                const parsed = JSON.parse(response);
+                if (parsed && parsed.result) {
+                    const resultData = parsed.result;
+                    const userData = resultData.user;
+                    let u = new User(
+                        userData?.id || 0,
+                        userData?.name || '',
+                        userData?.email || '',
+                        userData?.company_name || '',
+                        userData?.recent_sale_order_id || null,
+                    );
+
+                    if (resultData.leads) {
+                        u.leads = resultData.leads.map((lead_json) => Lead.fromJSON(lead_json));
+                    }
+                    if (resultData.tasks) {
+                        u.tasks = resultData.tasks.map((task_json) => Task.fromJSON(task_json));
+                    }
+                    if (resultData.tickets) {
+                        u.tickets = resultData.tickets.map((ticket_json) => HelpdeskTicket.fromJSON(ticket_json));
+                    }
+                    if (resultData.sale_orders) {
+                        u.saleOrders = resultData.sale_orders.map((so_json) => SaleOrder.fromJSON(so_json));
+                    }
+
+                    if (resultData.recent_sale_order_id) {
+                        u.recentSaleOrderId = resultData.recent_sale_order_id;
+                    }
+
+                    this.setState({ loggedInUser: u });
+                }
+            })
+            .catch((error) => {
+                console.log("Failed to fetch logged in user", error);
+            })
+            .finally(() => {
+                this.setState({ userLoading: false });
+            });
+    };
+
     private getPartnerDisconnectedRequest = () => {
         if (!Office.context.mailbox.item) {
             return;
@@ -320,13 +385,16 @@ class Main extends React.Component<MainProps, MainState> {
         this.setState({ contactKey: Math.random(), loadPartner: true });
     };
 
-    private onSeeAllSaleOrders = () => {
+    private onSeeAllSaleOrders = (partnerOverride?: Partner) => {
         const backStackItem = {
             type: BackStackItemType.partner,
             element: this.state.selectedPartner,
         } as BackStackItem;
         this.pushItemBackStack(backStackItem);
-        this.setState({ isShowingSaleOrders: true });
+        this.setState({
+            isShowingSaleOrders: true,
+            saleOrdersPartnerOverride: partnerOverride
+        });
     };
 
     private onBackClicked = () => {
@@ -364,20 +432,12 @@ class Main extends React.Component<MainProps, MainState> {
     };
 
     render() {
-        if (this.state.partnersLoading || this.state.translationsLoading) {
+        if (this.state.partnersLoading || this.state.translationsLoading || this.state.userLoading) {
             return <Progress />;
         }
 
         let topBarContent = null;
         let backButton = null;
-
-        if (this.state.backStack.length != 0) {
-            backButton = (
-                <div className="odoo-muted-button" onClick={this.onBackClicked} style={{ border: 'none' }}>
-                    <FontAwesomeIcon icon={faArrowLeft} />
-                </div>
-            );
-        }
 
         let broadCampStyle = {
             display: 'flex',
@@ -388,24 +448,22 @@ class Main extends React.Component<MainProps, MainState> {
             fontWeight: 600,
         };
 
-        if (this.state.isSearching) {
-            topBarContent = (
-                <div style={broadCampStyle}>
-                    {backButton}
-                    <div>{_t('Search In Database')}</div>
-                    <span />
+        if (this.state.backStack.length != 0) {
+            backButton = (
+                <div className="odoo-muted-button" onClick={this.onBackClicked} style={{ border: 'none' }}>
+                    <FontAwesomeIcon icon={faArrowLeft} />
                 </div>
             );
-        } else {
-            let refrechPartnerButton = null;
-            let addPartnerButton = null;
+        }
 
+        if (this.state.activeTab === 'my') {
+            let refreshUserButton = null;
             if (this.context.isConnected()) {
-                refrechPartnerButton = (
-                    <TooltipHost content={_t('Refresh Contact')}>
+                refreshUserButton = (
+                    <TooltipHost content={_t('Refresh User')}>
                         <div
                             className="odoo-muted-button"
-                            onClick={this.onRefreshPartnerClick}
+                            onClick={() => { this.setState({ userLoading: true }); this.getLoggedInUserRequest(); }}
                             style={{ border: 'none' }}>
                             <FontAwesomeIcon icon={faRedoAlt} style={{ cursor: 'pointer' }} />
                         </div>
@@ -413,39 +471,76 @@ class Main extends React.Component<MainProps, MainState> {
                 );
             }
 
-            if (
-                this.state.selectedPartner &&
-                !this.state.selectedPartner.isAddedToDatabase() &&
-                this.props.canCreatePartner
-            ) {
-                addPartnerButton = (
-                    <TooltipHost content={_t('Add Contact To Database')}>
-                        <div
-                            className="odoo-muted-button"
-                            onClick={this.addPartnerToDbRequest}
-                            style={{ border: 'none' }}>
-                            <FontAwesomeIcon icon={faPlusCircle} style={{ cursor: 'pointer' }} />
-                        </div>
-                    </TooltipHost>
-                );
-            }
-
             topBarContent = (
                 <div style={broadCampStyle}>
-                    {backButton}
-                    <div>{_t('Contact Details')}</div>
+                    {backButton ? backButton : null}
+                    <div>{_t('User Details')}</div>
                     <div style={{ display: 'flex' }}>
-                        <TooltipHost content={_t('Search In Odoo')}>
-                            <div className="odoo-muted-button" onClick={this.onSearchClick} style={{ border: 'none' }}>
-                                <FontAwesomeIcon icon={faSearch} style={{ cursor: 'pointer' }} />
-                            </div>
-                        </TooltipHost>
-                        {refrechPartnerButton}
-                        {addPartnerButton}
+                        {refreshUserButton}
                     </div>
                 </div>
             );
-        }
+        } else {
+
+            if (this.state.isSearching) {
+                topBarContent = (
+                    <div style={broadCampStyle}>
+                        {backButton}
+                        <div>{_t('Search In Database')}</div>
+                        <span />
+                    </div>
+                );
+            } else {
+                let refrechPartnerButton = null;
+                let addPartnerButton = null;
+
+                if (this.context.isConnected()) {
+                    refrechPartnerButton = (
+                        <TooltipHost content={_t('Refresh Contact')}>
+                            <div
+                                className="odoo-muted-button"
+                                onClick={this.onRefreshPartnerClick}
+                                style={{ border: 'none' }}>
+                                <FontAwesomeIcon icon={faRedoAlt} style={{ cursor: 'pointer' }} />
+                            </div>
+                        </TooltipHost>
+                    );
+                }
+
+                if (
+                    this.state.selectedPartner &&
+                    !this.state.selectedPartner.isAddedToDatabase() &&
+                    this.props.canCreatePartner
+                ) {
+                    addPartnerButton = (
+                        <TooltipHost content={_t('Add Contact To Database')}>
+                            <div
+                                className="odoo-muted-button"
+                                onClick={this.addPartnerToDbRequest}
+                                style={{ border: 'none' }}>
+                                <FontAwesomeIcon icon={faPlusCircle} style={{ cursor: 'pointer' }} />
+                            </div>
+                        </TooltipHost>
+                    );
+                }
+
+                topBarContent = (
+                    <div style={broadCampStyle}>
+                        {backButton}
+                        <div>{_t('Contact Details')}</div>
+                        <div style={{ display: 'flex' }}>
+                            <TooltipHost content={_t('Search In Odoo')}>
+                                <div className="odoo-muted-button" onClick={this.onSearchClick} style={{ border: 'none' }}>
+                                    <FontAwesomeIcon icon={faSearch} style={{ cursor: 'pointer' }} />
+                                </div>
+                            </TooltipHost>
+                            {refrechPartnerButton}
+                            {addPartnerButton}
+                        </div>
+                    </div>
+                );
+            }
+        } // close is My tab check
 
         let topBar = <div style={{ margin: '8px' }}>{topBarContent}</div>;
 
@@ -485,27 +580,43 @@ class Main extends React.Component<MainProps, MainState> {
                 </div>
             );
         } else {
+            let contactTabContent = null;
             if (this.state.selectedPartner) {
-                mainContent = (
-                    <>
-                        <ContactPage
-                            partner={this.state.selectedPartner}
-                            onPartnerChanged={this.updatePartner}
-                            loadPartner={this.state.loadPartner}
-                            onSeeAllSaleOrders={this.onSeeAllSaleOrders}
-                            key={this.state.contactKey}
-                        />
-                    </>
+                contactTabContent = (
+                    <ContactPage
+                        partner={this.state.selectedPartner}
+                        onPartnerChanged={this.updatePartner}
+                        loadPartner={this.state.loadPartner}
+                        onSeeAllSaleOrders={this.onSeeAllSaleOrders}
+                        key={this.state.contactKey}
+                    />
                 );
             }
+
+            mainContent = (
+                <Pivot onLinkClick={(item) => this.setState({ activeTab: item.props.itemKey })} selectedKey={this.state.activeTab}>
+                    <PivotItem headerText="Contact" itemKey="contact">
+                        {contactTabContent}
+                    </PivotItem>
+                    <PivotItem headerText="My" itemKey="my">
+                        <UserPage
+                            user={this.state.loggedInUser}
+                            onSeeAllSaleOrders={this.onSeeAllSaleOrders}
+                        />
+                    </PivotItem>
+                </Pivot>
+            );
         }
 
         if (this.state.isShowingSaleOrders) {
+            const partnerToShow = this.state.saleOrdersPartnerOverride || this.state.selectedPartner;
+            const loadPartner = this.state.saleOrdersPartnerOverride ? false : this.state.loadPartner;
+
             mainContent = (
                 <SaleOrdersPage
-                    partner={this.state.selectedPartner}
+                    partner={partnerToShow}
                     onBack={this.onBackClicked}
-                    loadPartner={this.state.loadPartner}
+                    loadPartner={loadPartner}
                     onPartnerChanged={this.updatePartner}
                     key={this.state.contactKey}
                 />

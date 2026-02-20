@@ -13,6 +13,7 @@ const api = {
     logSingleMail: '/mail_plugin/log_mail_content',
     logSaleOrder: '/mail_plugin/sale/log_mail_content',
     searchPartner: '/mail_plugin/partner/search',
+    getUser: '/mail_plugin/user/get',
     getTranslations: '/mail_plugin/get_translations',
     searchProject: '/mail_plugin/project/search',
     searchSaleOrder: '/mail_plugin/sale/search',

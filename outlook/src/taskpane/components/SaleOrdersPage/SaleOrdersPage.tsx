@@ -133,7 +133,7 @@ class SaleOrdersPage extends React.Component<SaleOrdersPageProps, SaleOrdersPage
                         <>
                             {saleOrders.filter(o => o.id === partner.currentSaleOrderId).map((order) => (
                                 <div key={`current-${order.id}`}>
-                                    <div className="sale-order-section-label">{_t('Current')}</div>
+                                    <div className="recent">{_t('Recent')}</div>
                                     <ListItem
                                         model="sale.order"
                                         res_id={order.id}

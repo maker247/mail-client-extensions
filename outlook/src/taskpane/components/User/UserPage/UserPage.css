@@ -1,0 +1,9 @@
+.user-page {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 24px;
+}
+
+.user-page .section-card {
+    margin-bottom: 8px;
+}
