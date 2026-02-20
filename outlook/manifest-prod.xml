@@ -6,11 +6,11 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Odoo for Outlook"/>
   <Description DefaultValue="Odoo for Outlook."/>
-  <IconUrl DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/app-icon.png"/>
+  <IconUrl DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+  <HighResolutionIconUrl DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
   <SupportUrl DefaultValue="https://www.odoo.com/help"/>
   <AppDomains>
-    <AppDomain>https://localhost:3000</AppDomain>
+    <AppDomain>https://erp-outlook.infinityitsuccess.com</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
@@ -23,7 +23,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
+        <SourceLocation DefaultValue="https://erp-outlook.infinityitsuccess.com/taskpane.html"/>
         <RequestedHeight>250</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -72,14 +72,14 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-        <bt:Image id="Icon.64x64" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-        <bt:Image id="Icon.128x128" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+        <bt:Image id="Icon.64x64" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+        <bt:Image id="Icon.128x128" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://erp-outlook.infinityitsuccess.com/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="Odoo for Outlook"/>
@@ -129,14 +129,14 @@
       </Hosts>
       <Resources>
         <bt:Images>
-          <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-          <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-          <bt:Image id="Icon.64x64" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-          <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
-          <bt:Image id="Icon.128x128" DefaultValue="https://localhost:3000/assets/app-icon.png"/>
+          <bt:Image id="Icon.16x16" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+          <bt:Image id="Icon.32x32" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+          <bt:Image id="Icon.64x64" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+          <bt:Image id="Icon.80x80" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
+          <bt:Image id="Icon.128x128" DefaultValue="https://erp-outlook.infinityitsuccess.com/assets/app-icon.png"/>
         </bt:Images>
         <bt:Urls>
-          <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
+          <bt:Url id="Taskpane.Url" DefaultValue="https://erp-outlook.infinityitsuccess.com/taskpane.html"/>
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="GroupLabel" DefaultValue="Odoo for Outlook"/>

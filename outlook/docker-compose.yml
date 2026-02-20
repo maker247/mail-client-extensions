@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  outlook-extension:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # The DOMAIN argument is injected into the manifest.xml during Webpack build.
+        # Ensure this matches the domain of your proxy server (e.g., outlook.yourcompany.com).
+        # You can override this by running: DOMAIN=my.domain.com docker-compose up -d --build
+        - DOMAIN=${DOMAIN:-localhost:3000}
+    container_name: infs-outlook-extension
+    ports:
+      # Exposes port 3000 on the host to port 80 inside the Nginx container
+      # Your proxy server should forward traffic to http://127.0.0.1:3000
+      - "3000:80"
+    restart: always
+    environment:
+      - NODE_ENV=production
